@@ -1,9 +1,11 @@
 from google.transit import gtfs_realtime_pb2
-import requests
+import sys
 import os
-import math
+import time
 import random
+import math
 from math import sin, cos, sqrt, atan2, radians
+import requests
 import pathlib
 
 # Parse a CSV file into a list of rows
@@ -92,38 +94,49 @@ prevStopSeq = 0
 for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
   # Make sure stops are ordered by their sequence for each trip
   stopSeq = len(r[4])
-  if stopSeq < prevStopSeq and stopSeq != 1: print('Error: stop_times.txt is not ordered by sequence!')
+  if stopSeq < prevStopSeq and stopSeq != 1: print('Error: stop_times.txt is not ordered by sequence!', file=sys.stderr)
   prevStopSeq = stopSeq
   stopTime = StopTime(r[0],r[1],r[2],r[3],r[4],r[5],r[8])
   trips[r[0]].addStopTime(stopTime)
-  
-# Get real-time vehicle positions
-feed = gtfs_realtime_pb2.FeedMessage()
-response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
-feed.ParseFromString(response.content)
-limit = int(random.random() * len(feed.entity))
-# print("Vehicle ID, Closest Stop ID, Distance")
-for vehicle in feed.entity:
-  if vehicle.is_deleted: continue
-  vehicle = vehicle.vehicle
-  vehicleLat = float(vehicle.position.latitude)
-  vehicleLon = float(vehicle.position.longitude)
-  
-  vehicleTrip = trips[vehicle.trip.trip_id]
-  vehicleStops = [] # list of Stop objects
-  for stopTime in vehicleTrip.stopTimes:
-    stopID = stopTime.stop_id
-    stop = stops[stopID]
-    vehicleStops.append(stop)
-  
-  # Calculate minimum distance
-  closestStop = vehicleStops[0]
-  minDistance = calculareDistance(vehicleLat,vehicleLon,closestStop.lat,closestStop.lon)
-  for stop in vehicleStops:
-    distance = calculareDistance(vehicleLat,vehicleLon,stop.lat,stop.lon)
-    if distance < minDistance:
-      closestStop = stop
-      minDistance = distance
-  print("%s,%s,%f" % (vehicle.vehicle.id,closestStop.id,minDistance))
+
+# Collect errors to report them only once
+unknownTrips = set() # trips not found in the database
+errorVehicles = set() # Errorneous vehicle ids
+
+while True:
+  # Get real-time vehicle positions
+  feed = gtfs_realtime_pb2.FeedMessage()
+  response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
+  feed.ParseFromString(response.content)
+  limit = int(random.random() * len(feed.entity))
+  for vehicle in feed.entity:
+    if vehicle.is_deleted: continue
+    vehicle = vehicle.vehicle
+    vehicleLat = float(vehicle.position.latitude)
+    vehicleLon = float(vehicle.position.longitude)
+    
+    if vehicle.trip.trip_id not in trips:
+      if vehicle.trip.trip_id in unknownTrips and vehicle.vehicle.id in errorVehicles: continue
+      unknownTrips.add(vehicle.trip.trip_id)
+      errorVehicles.add(vehicle.vehicle.id)
+      print("Error, vehicle (#%s) is in an unknown trip (#%s)" % (vehicle.vehicle.id,vehicle.trip.trip_id), file=sys.stderr)
+      continue
+    vehicleTrip = trips[vehicle.trip.trip_id]
+    vehicleStops = [] # list of Stop objects
+    for stopTime in vehicleTrip.stopTimes:
+      stopID = stopTime.stop_id
+      stop = stops[stopID]
+      vehicleStops.append(stop)
+    
+    # Calculate minimum distance
+    closestStop = vehicleStops[0]
+    minDistance = calculareDistance(vehicleLat,vehicleLon,closestStop.lat,closestStop.lon)
+    for stop in vehicleStops:
+      distance = calculareDistance(vehicleLat,vehicleLon,stop.lat,stop.lon)
+      if distance < minDistance:
+        closestStop = stop
+        minDistance = distance
+    print("%s,%s,%f" % (vehicle.vehicle.id,closestStop.id,minDistance))
+  time.sleep(30)
 
 
