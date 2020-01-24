@@ -71,18 +71,13 @@ class Trip:
     self.id = id
     self.headsign = headsign # Direction displayed on bus
     self.direction_id = direction_id
-    self.stopTimes = [] # List of all StopTime objects
+    self.stopTimes = {} # Stop Sequence --> StopTime objects
+    self.stopSeqCounter = 0 # next expected stop sequence (in addStopTime() function)
   
-  def addStopTime(self,stopTime):
-    self.stopTimes.append(stopTime)
-  
-  # Makes sure all stopTimes are in sequential order
-  def checkTrips(self):
-    prevSeq = 0
-    for stopTime in self.stopTimes:
-      if stopTime.sequence < prevSeq: return False
-      prevSeq = stopTime.sequence
-    return True
+  def addStopTime(self,seq,stopTime):
+    self.stopSeqCounter += 1
+    if int(seq) != self.stopSeqCounter: print('Error: stop_times.txt is not ordered by sequence!', file=sys.stderr)
+    else: self.stopTimes[seq] = stopTime
 
 
 # Get information from GTFS data
@@ -93,14 +88,9 @@ for r in parseCSVtoList(basePath + "/gtfs/trips.txt"): trips[r[2]] = Trip(r[0],r
 stops = {} # {stopID --> Stop object}
 for r in parseCSVtoList(basePath + "/gtfs/stops.txt"): stops[r[0]] = Stop(r[0],r[1],r[4],r[5])
 
-prevStopSeq = 0
 for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
-  # Make sure stops are ordered by their sequence for each trip
-  stopSeq = len(r[4])
-  if stopSeq < prevStopSeq and stopSeq != 1: print('Error: stop_times.txt is not ordered by sequence!', file=sys.stderr)
-  prevStopSeq = stopSeq
   stopTime = StopTime(r[0],r[1],r[2],r[3],r[4],r[5],r[8])
-  trips[r[0]].addStopTime(stopTime)
+  trips[r[0]].addStopTime(r[4],stopTime)
 
 # Collect errors to report them only once
 unknownTrips = set() # trips not found in the database
@@ -112,7 +102,7 @@ while True:
   response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
   feed.ParseFromString(response.content)
   limit = int(random.random() * len(feed.entity))
-  # print("Time, Vehicle ID, Closest Stop ID, Distance, Trip ID")
+  # print("Time, Vehicle ID, Trip ID, Closest Stop ID, Stop Sequence, Distance")
   for vehicle in feed.entity:
     if vehicle.is_deleted: continue
     vehicle = vehicle.vehicle
@@ -126,22 +116,20 @@ while True:
       print("Error, vehicle (#%s) is in an unknown trip (#%s)" % (vehicle.vehicle.id,vehicle.trip.trip_id), file=sys.stderr)
       continue
     vehicleTrip = trips[vehicle.trip.trip_id]
-    vehicleStops = [] # list of Stop objects
-    for stopTime in vehicleTrip.stopTimes:
-      stopID = stopTime.stop_id
-      stop = stops[stopID]
-      vehicleStops.append(stop)
     
     # Calculate minimum distance
-    closestStop = vehicleStops[0]
+    closestStop = stops[vehicleTrip.stopTimes["1"].stop_id] # Set to first element by default
+    closestSeq = 1
     minDistance = calculareDistance(vehicleLat,vehicleLon,closestStop.lat,closestStop.lon)
-    for stop in vehicleStops:
+    for (seq,stop_time) in vehicleTrip.stopTimes.items():
+      stop = stops[stop_time.stop_id]
       distance = calculareDistance(vehicleLat,vehicleLon,stop.lat,stop.lon)
       if distance < minDistance:
         closestStop = stop
+        closestSeq = seq
         minDistance = distance
     current_time = time.strftime("%D--%H:%M:%S", time.localtime())
-    print("%s,%s,%s,%f,%s" % (current_time,vehicle.vehicle.id,closestStop.id,minDistance,vehicle.trip.trip_id))
+    print("%s,%s,%s,%s,%s,%f" % (current_time,vehicle.vehicle.id,vehicle.trip.trip_id,closestStop.id,closestSeq,minDistance))
   time.sleep(30)
 
 
