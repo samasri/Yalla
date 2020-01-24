@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from google.transit import gtfs_realtime_pb2
 import sys
 import os
@@ -7,6 +9,7 @@ import math
 from math import sin, cos, sqrt, atan2, radians
 import requests
 import pathlib
+import time
 
 # Parse a CSV file into a list of rows
 def parseCSVtoList(f):
@@ -109,6 +112,7 @@ while True:
   response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
   feed.ParseFromString(response.content)
   limit = int(random.random() * len(feed.entity))
+  # print("Time, Vehicle ID, Closest Stop ID, Distance, Trip ID")
   for vehicle in feed.entity:
     if vehicle.is_deleted: continue
     vehicle = vehicle.vehicle
@@ -136,7 +140,8 @@ while True:
       if distance < minDistance:
         closestStop = stop
         minDistance = distance
-    print("%s,%s,%f" % (vehicle.vehicle.id,closestStop.id,minDistance))
+    current_time = time.strftime("%D--%H:%M:%S", time.localtime())
+    print("%s,%s,%s,%f,%s" % (current_time,vehicle.vehicle.id,closestStop.id,minDistance,vehicle.trip.trip_id))
   time.sleep(30)
 
 
