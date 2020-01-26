@@ -63,7 +63,7 @@ for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
     stopID = r[3]
     arrivalTime = r[1].strip()
     if tripID not in tripSchedule: tripSchedule[tripID] = {}
-    if stopSeq in tripSchedule[tripID]: print('Error: %s - %s' % (tripID,stopSeq), file=sys.stderr)
+    if stopSeq in tripSchedule[tripID]: print('Trip #%s has two data points for the same sequence (#%s)' % (tripID,stopSeq), file=sys.stderr)
 
     # if str.isdigit(arrivalTime[:2]) and int(arrivalTime[:2]) >= 24: continue
     tripSchedule[tripID][stopSeq] = (stopID,ArrivalTime(arrivalTime))
@@ -71,44 +71,49 @@ for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
 for f in listdir(join(basePath,'results')):
     currentDate = f # file is called after the date it represents
     vehicles = {} # Trip ID --> Stop Sequence --> Record
-    tripBuses = {}
+    delays = {}
     for r in open(join(basePath,'results',f)):
         r = r.strip()
         if not r: continue
         r = r.split(',')
-        vehicleID = r[1]
-        stopID = r[3]
-        stopSeq = r[4]
-        record = Record(r[5],r[0])
-        tripID = r[2]
-        if tripID not in tripBuses: tripBuses[tripID] = set()
-        tripBuses[tripID].add(vehicleID)
-        if vehicleID not in vehicles: vehicles[vehicleID] = {}
-        if tripID not in vehicles[vehicleID]: vehicles[vehicleID][tripID] = {}
-        if stopSeq in vehicles[vehicleID][tripID]:
-            oldRecord = vehicles[vehicleID][tripID][stopSeq]
-            vehicles[vehicleID][tripID][stopSeq] = minRecord(oldRecord,record)
-        else: vehicles[vehicleID][tripID][stopSeq] = record
+        stopSeq = r[3]
+        record = Record(r[4],r[0])
+        tripID = r[1]
+        routeID = r[2]
+        if tripID not in vehicles: vehicles[tripID] = {}
+        if stopSeq in vehicles[tripID]:
+            oldRecord = vehicles[tripID][stopSeq]
+            vehicles[tripID][stopSeq] = minRecord(oldRecord,record)
+        else: vehicles[tripID][stopSeq] = record
 
-    for tripID,buses in tripBuses.items():
-        if(len(buses) > 1):
-            print("%s --> %s" % (tripID, str(buses)))
     distanceFreq = {}
     total = 0
-    for vehicleID, trips in vehicles.items():
-        for tripID, stops in trips.items():
-            for stopSeq,record in stops.items():
-                total += 1
-                # print("Bus #%s:" % vehicleID)
-                # print("Trip ID: %s" % tripID)
-                # print("Stop Sequence: %s" % stopSeq)
-                # print("Distance from stop: %s" % record.distance)
-                # print("Timestamp: %s" % datetime.strftime(record.timestamp,"%D--%H:%M:%S"))
-                deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(currentDate)
-                # print("Delay: %s" % str(deltaTime))
-                distance = int(float(record.distance)/10)
-                if distance not in distanceFreq: distanceFreq[distance] = 0
-                distanceFreq[distance] += 1
+    for tripID, stops in vehicles.items():
+        for stopSeq,record in stops.items():
+            total += 1
+            stopID = tripSchedule[tripID][stopSeq][0]
+            # print("Trip ID: %s" % tripID)
+            # print("Stop Sequence: %s" % stopSeq)
+            # print("Distance from stop: %s" % record.distance)
+            # print("Timestamp: %s" % datetime.strftime(record.timestamp,"%D--%H:%M:%S"))
+            deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(currentDate)
+            # print("Delay: %s" % str(deltaTime))
+
+            if stopID not in delays: delays[stopID] = {}
+            if tripID in delays[stopID]: print('Error: Trip #%s has two records for the same stopID (#%s)' % (tripID,stopID), file=sys.stderr)
+            delays[stopID][tripID] = deltaTime.total_seconds()/60
+            if delays[stopID][tripID] > 30: print ("%s,%s" % (tripID, stopID))
+            distance = int(float(record.distance)/10)
+            if distance not in distanceFreq: distanceFreq[distance] = 0
+            distanceFreq[distance] += 1
+    
+    avg = 0
+    total = 0
+    for (stopID,trips) in delays.items():
+        for (tripID, deltaTime) in trips.items():
+            avg += deltaTime
+            total += 1
+    print("Average: %f" % (avg/total))
 
     distanceFreq = sorted(distanceFreq.items(), key=lambda kv: kv[0])
     distanceFreq = collections.OrderedDict(distanceFreq)

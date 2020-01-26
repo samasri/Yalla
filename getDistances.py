@@ -102,7 +102,7 @@ while True:
   response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
   feed.ParseFromString(response.content)
   limit = int(random.random() * len(feed.entity))
-  # print("Time, Vehicle ID, Trip ID, Closest Stop ID, Stop Sequence, Distance")
+  # print("Time, Trip ID, Route ID, Stop Sequence, Distance")
   for vehicle in feed.entity:
     if vehicle.is_deleted: continue
     vehicle = vehicle.vehicle
@@ -129,7 +129,7 @@ while True:
         closestSeq = seq
         minDistance = distance
     current_time = time.strftime("%D--%H:%M:%S", time.localtime())
-    print("%s,%s,%s,%s,%s,%f" % (current_time,vehicle.vehicle.id,vehicle.trip.trip_id,closestStop.id,closestSeq,minDistance))
+    print("%s,%s,%s,%s,%f" % (current_time,vehicle.trip.trip_id,vehicle.trip.route_id,closestSeq,minDistance))
   time.sleep(30)
 
 
