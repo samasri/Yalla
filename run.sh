@@ -1,7 +1,10 @@
-#!bin/bash
+#!/usr/bin/env bash
 
-echo "I am running"
-DATE=$(date '+%F')
-/home/samasri/yalla/getDistances.py > /home/samasri/yalla/results-$DATE 2> /home/samasri/yalla/results-err-$DATE &
-sleep 5 # wait 24 hours
-# kill -9 $(pgrep python3)
+if [ "$1" == "stop" ]; then
+    kill -9 $(pgrep python3)
+else 
+    while true; do
+       DATE=$(date '+%F')
+      /home/samasri/yalla/getDistances.py 60 >> /home/samasri/yalla/results/$DATE 2>> /home/samasri/yalla/results-err/$DATE
+    done
+fi

@@ -10,6 +10,19 @@ from math import sin, cos, sqrt, atan2, radians
 import requests
 import pathlib
 import time
+from datetime import datetime, timedelta
+
+# Parse arguement
+if len(sys.argv) != 2:
+  print("Please enter number of minutes for this script to run")
+  exit()
+else:
+  try:
+    timeToRun = timedelta(minutes=int(sys.argv[1]))
+  except:
+    print("Arugment is invalid. Please enter an integer representing the number of minutes for this script to run")
+    exit()
+
 
 # Parse a CSV file into a list of rows
 def parseCSVtoList(f):
@@ -96,7 +109,10 @@ for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
 unknownTrips = set() # trips not found in the database
 errorVehicles = set() # Errorneous vehicle ids
 
+startTime = datetime.now()
 while True:
+  runTime = datetime.now() - startTime
+  if runTime >= timeToRun: exit()
   # Get real-time vehicle positions
   feed = gtfs_realtime_pb2.FeedMessage()
   response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
