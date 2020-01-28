@@ -111,8 +111,6 @@ errorVehicles = set() # Errorneous vehicle ids
 
 startTime = datetime.now()
 while True:
-  runTime = datetime.now() - startTime
-  if runTime >= timeToRun: exit()
   # Get real-time vehicle positions
   feed = gtfs_realtime_pb2.FeedMessage()
   response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
@@ -146,6 +144,10 @@ while True:
         minDistance = distance
     current_time = time.strftime("%D--%H:%M:%S", time.localtime())
     print("%s,%s,%s,%s,%f" % (current_time,vehicle.trip.trip_id,vehicle.trip.route_id,closestSeq,minDistance))
+  runTime = datetime.now() - startTime
+  if runTime >= timeToRun: exit()
   time.sleep(30)
+  runTime = datetime.now() - startTime
+  if runTime >= timeToRun: exit()
 
 
