@@ -90,10 +90,14 @@ for f in listdir(join(basePath,'results')):
         else: vehicles[tripID][stopSeq] = record
 
     total = 0
+    ignored = 0
     for tripID, stops in vehicles.items():
         for stopSeq,record in stops.items():
             total += 1
-            if record.distance > 20: continue
+            if record.distance > 20: 
+                ignored += 1
+                continue
+            
             stopID = tripSchedule[tripID][stopSeq][0]
             routeID = tripRoutes[tripID]
             deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(currentDate)
