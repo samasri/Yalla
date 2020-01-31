@@ -64,6 +64,9 @@ class Stop:
   
   def __str__(self):
     return ("Stop %s: (%s,%s)" % (self.id,self.lat,self.lon))
+  
+  def toMySQL(self):
+    return "INSERT INTO Stop (StopID, lat, lon) VALUES(%d,%f,%f);" % (int(self.id),self.lat,self.lon)
 
 # Links a trip to a stop
 class StopTime:
@@ -100,6 +103,7 @@ for r in parseCSVtoList(basePath + "/gtfs/trips.txt"): trips[r[2]] = Trip(r[0],r
 
 stops = {} # {stopID --> Stop object}
 for r in parseCSVtoList(basePath + "/gtfs/stops.txt"): stops[r[0]] = Stop(r[0],r[1],r[4],r[5])
+# for (id,stop) in stops.items(): print (stop.toMySQL())
 
 for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
   stopTime = StopTime(r[0],r[1],r[2],r[3],r[4],r[5],r[8])
