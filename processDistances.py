@@ -76,12 +76,13 @@ for f in listdir(join(basePath,'results')):
         r = r.strip()
         if not r: continue
         r = r.split(',')
-        stopSeq = r[3]
-        record = Record(r[4],r[0]) # A Record constructor takes distance and time
         tripID = r[1]
-        routeID = r[2]
+        headsign = r[2]
+        routeID = r[3]
+        stopSeq = r[4]
+        record = Record(r[5],r[0]) # A Record constructor takes distance and time
 
-        tripRoutes[tripID] = routeID
+        tripRoutes[tripID] = routeID + ' ' + headsign
 
         if tripID not in vehicles: vehicles[tripID] = {}
         if stopSeq in vehicles[tripID]:
@@ -106,13 +107,10 @@ for f in listdir(join(basePath,'results')):
             if routeID not in delays[stopID]: delays[stopID][routeID] = set()
             delays[stopID][routeID].add(deltaTime.total_seconds()/60)
 
-# Calculate average delay
-for (stopID,routes) in delays.items():
-    for (routeID, trips) in routes.items():
-        delays[stopID][routeID] = sum(trips)/len(trips)
-
 # Print MySQL code
-print("CREATE TABLE Delay (stopID INT, routeID INT, delay FLOAT);");
+print("CREATE TABLE Delay (stopID INT, routeID VARCHAR(30), delay FLOAT, nbOfData INT);");
 for (stopID,routes) in delays.items():
-    for (routeID, delay) in routes.items():
-        print("INSERT INTO Delay (stopID, routeID, delay) VALUES (%d,%d,%f);" % (int(stopID),int(routeID),float(delay)))
+    for (routeID, delayRecords) in routes.items():
+        # Calculate average delay
+        avgDelay = sum(delayRecords)/len(delayRecords)
+        print("INSERT INTO Delay (stopID, routeID, delay, nbOfData) VALUES (%d,\"%s\",%f,%d);" % (int(stopID),routeID,float(avgDelay), len(delayRecords)))
