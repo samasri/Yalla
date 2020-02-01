@@ -18,10 +18,11 @@ $(document).ready(function() {
             }));
             for(routeID of routeIDs) {
                 $('#routes').append($('<option>', {
-                    value: routeID.routeID,
+                    "data-tokens": routeID.routeID,
                     text: routeID.routeID
                 }));
             }
+            $('#routes').selectpicker('refresh');
         },
         error: function() {
           alert("Could not successfully reach server/trips")
@@ -48,4 +49,8 @@ $(document).ready(function() {
         }
         return false;
     });
+
+    $('#searchRoutes').on('blur', function(e){
+        this.value = this.value.trim() || this.defaultValue;
+     });
 });

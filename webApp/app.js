@@ -37,7 +37,6 @@ app.get("/", (req, res) => {
 
 app.get("/routes", (req,res) => {
   connection.query("SELECT DISTINCT(routeID) FROM Route", function (error, results, fields) {
-    results = results.slice(0,5);
     tripIDs = []
     for(var r of results) tripIDs.push(r);
     res.end(JSON.stringify(tripIDs));
