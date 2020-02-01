@@ -99,7 +99,7 @@ class Trip:
 # Get information from GTFS data
 basePath = str(pathlib.Path(__file__).parent.absolute())
 trips = {} # {tripID --> Trip object}
-for r in parseCSVtoList(basePath + "/gtfs/trips.txt"): trips[r[2]] = Trip(r[0],r[1],r[2],r[4],r[5])
+for r in parseCSVtoList(basePath + "/gtfs/trips.txt"): trips[r[2]] = Trip(r[0],r[1],r[2],r[3],r[5])
 
 stops = {} # {stopID --> Stop object}
 for r in parseCSVtoList(basePath + "/gtfs/stops.txt"): stops[r[0]] = Stop(r[0],r[1],r[4],r[5])
@@ -120,20 +120,19 @@ while True:
   response = requests.get('http://rtu.york.ca/gtfsrealtime/VehiclePositions')
   feed.ParseFromString(response.content)
   limit = int(random.random() * len(feed.entity))
-  # print("Time, Trip ID, Route ID, Stop Sequence, Distance")
   for vehicle in feed.entity:
     if vehicle.is_deleted: continue
     vehicle = vehicle.vehicle
     vehicleLat = float(vehicle.position.latitude)
     vehicleLon = float(vehicle.position.longitude)
-    
-    if vehicle.trip.trip_id not in trips:
-      if vehicle.trip.trip_id in unknownTrips and vehicle.vehicle.id in errorVehicles: continue
-      unknownTrips.add(vehicle.trip.trip_id)
+    vehicleTripID = vehicle.trip.trip_id
+    if vehicleTripID not in trips:
+      if vehicleTripID in unknownTrips and vehicle.vehicle.id in errorVehicles: continue
+      unknownTrips.add(vehicleTripID)
       errorVehicles.add(vehicle.vehicle.id)
-      print("Error, vehicle (#%s) is in an unknown trip (#%s)" % (vehicle.vehicle.id,vehicle.trip.trip_id), file=sys.stderr)
+      print("Error, vehicle (#%s) is in an unknown trip (#%s)" % (vehicle.vehicle.id,vehicleTripID), file=sys.stderr)
       continue
-    vehicleTrip = trips[vehicle.trip.trip_id]
+    vehicleTrip = trips[vehicleTripID]
     
     # Calculate minimum distance
     closestStop = stops[vehicleTrip.stopTimes["1"].stop_id] # Set to first element by default
@@ -147,9 +146,11 @@ while True:
         closestSeq = seq
         minDistance = distance
     current_time = time.strftime("%D--%H:%M:%S", time.localtime())
-    print("%s,%s,%s,%s,%f" % (current_time,vehicle.trip.trip_id,vehicle.trip.route_id,closestSeq,minDistance))
+    # Printing: Time, Trip ID, Head Sign, Route ID, Stop Sequence, Distance
+    print("%s,%s,%s,%s,%s,%f" % (current_time,vehicleTripID,trips[vehicleTripID].headsign, vehicle.trip.route_id,closestSeq,minDistance))
   runTime = datetime.now() - startTime
   if runTime >= timeToRun: exit()
+  # Repeat every 30 seconds till for a duration specified in the arguments of this program
   time.sleep(30)
   runTime = datetime.now() - startTime
   if runTime >= timeToRun: exit()

@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/routes", (req,res) => {
-  connection.query("SELECT DISTINCT(routeID) FROM Route", function (error, results, fields) {
+  connection.query("SELECT DISTINCT(routeID) FROM Delay", function (error, results, fields) {
     tripIDs = []
     for(var r of results) tripIDs.push(r);
     res.end(JSON.stringify(tripIDs));
@@ -39,11 +39,11 @@ app.get("/routes", (req,res) => {
 });
 
 app.get("/stops", (req,res) => {
-  query = `SELECT DISTINCT(Delay.stopID),lon,lat,delay
+  query = `SELECT DISTINCT(Delay.stopID),lon,lat,delay,nbOfData
             FROM Delay 
             INNER JOIN Stop 
             ON Delay.stopID=Stop.StopID
-            WHERE routeID=${req.query.routeID}`
+            WHERE routeID='${req.query.routeID}'`
   connection.query(query, function (error, results, fields) {
     res.end(JSON.stringify(results));
   });

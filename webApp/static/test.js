@@ -15,7 +15,7 @@ $(document).ready(function() {
         success: function(r) {
             let routeIDs = JSON.parse(r);
             $('#routes').append($('<option>', {
-                value: -1,
+                "data-tokens": -1,
                 text: "None"
             }));
             for(routeID of routeIDs) {
@@ -46,7 +46,7 @@ $(document).ready(function() {
                     for(result of results) {
                         var marker = L.marker([result.lat, result.lon]).addTo(displayedMarkers);
                         result.delay = (Math.round(result.delay * 100) / 100).toFixed(2)
-                        marker.bindPopup('Average Delay is: ' + result.delay + ' minutes');
+                        marker.bindPopup('Average Delay is: ' + result.delay + ' minutes (based on ' + result.nbOfData + ' data points)');
                     }
                 },
                 error: function() {
