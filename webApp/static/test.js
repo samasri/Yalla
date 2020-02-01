@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+    var mymap = L.map('mapid').setView([43.8524, -79.4162], 11);
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -9,13 +9,17 @@ $(document).ready(function() {
 
     $.ajax({
         type: 'GET',
-        url: '/trips', 
+        url: '/routes',
         success: function(r) {
-            let tripIDs = r.split(',');
-            for(tripID of tripIDs) {
+            let routeIDs = JSON.parse(r);
+            $('#routes').append($('<option>', {
+                value: -1,
+                text: "None"
+            }));
+            for(routeID of routeIDs) {
                 $('#routes').append($('<option>', {
-                    value: 1,
-                    text: tripID
+                    value: routeID.routeID,
+                    text: routeID.routeID
                 }));
             }
         },
@@ -24,18 +28,24 @@ $(document).ready(function() {
         }
     });
 
-    //listen for 'submit'
-    $('.container').find('form').on('submit', function(event) {
+    var displayedMarkers = L.layerGroup().addTo(mymap);
+    $("#routes").change (function(){
+        var routeID = $(this).children("option:selected").val();
+        displayedMarkers.clearLayers();
+        if(routeID != -1 ) {
+            $.ajax({
+                type: 'GET',
+                url: '/stops/',
+                data: {"routeID": routeID},
+                success: function(coordinatesString) {
+                    let coordinates = JSON.parse(coordinatesString);
+                    for(coordinate of coordinates) L.marker([coordinate.lat, coordinate.lon]).addTo(displayedMarkers);
+                },
+                error: function() {
+                alert("Could not successfully reach server/stops")
+                }
+            });
+        }
         return false;
-        // $.ajax({
-        //     type: 'POST',
-        //     url: '/tweets', 
-        //     "data": $textbox,
-        //     success: function() {
-        //     $('main #tweetSection').html("")    // clear all html
-        //     loadTweets()}                       // load tweets again
-        //     // error: function() {     //sometimes problematic... remove?
-        //     //   alert("Could not load tweets")}
-        // })
     });
 });

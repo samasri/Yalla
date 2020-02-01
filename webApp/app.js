@@ -27,7 +27,7 @@ const server = http.createServer((req, res) => {
 });
 
 app.get("/", (req, res) => {
-  connection.query("SELECT DISTINCT(tripID) FROM trips", function (error, results, fields) {
+  connection.query("SELECT DISTINCT(tripID) FROM Trip", function (error, results, fields) {
     results = results.slice(0,5);
     tripIDs = []
     for(var r of results) tripIDs.push(r.tripID);
@@ -35,23 +35,25 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/trips", (req,res) => {
-  connection.query("SELECT DISTINCT(tripID) FROM trips", function (error, results, fields) {
+app.get("/routes", (req,res) => {
+  connection.query("SELECT DISTINCT(routeID) FROM Route", function (error, results, fields) {
     results = results.slice(0,5);
     tripIDs = []
-    for(var r of results) tripIDs.push(r.tripID);
-    res.end(tripIDs.toString());
+    for(var r of results) tripIDs.push(r);
+    res.end(JSON.stringify(tripIDs));
   });
 });
 
-// app.get("/trip/:tripID", (req,res) => {
-//   connection.query("SELECT DISTINCT(tripID) FROM trips", function (error, results, fields) {
-//     results = results.slice(0,5);
-//     tripIDs = []
-//     for(var r of results) tripIDs.push(r.tripID);
-//     res.end(tripIDs.toString());
-//   });
-// });
+app.get("/stops", (req,res) => {
+  query = `SELECT DISTINCT(Trip.stopID),lon,lat
+            FROM Trip 
+            INNER JOIN Stop 
+            ON Trip.stopID=Stop.StopID
+            WHERE routeID=${req.query.routeID}`
+  connection.query(query, function (error, results, fields) {
+    res.end(JSON.stringify(results));
+  });
+});
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);

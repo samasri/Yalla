@@ -5,6 +5,7 @@ if [ "$1" == "stop" ]; then
 else 
     while true; do
        DATE=$(date '+%F')
+       touch /home/samasri/yalla/results/$DATE /home/samasri/yalla/results-err/$DATE
       /home/samasri/yalla/getDistances.py 60 >> /home/samasri/yalla/results/$DATE 2>> /home/samasri/yalla/results-err/$DATE
     done
 fi
