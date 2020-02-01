@@ -1,4 +1,4 @@
-CREATE TABLE Delay (stopID INT, routeID VARCHAR(30), delay FLOAT, nbOfData INT);
+CREATE TABLE Delay (stopID INT, routeID VARCHAR(100), delay FLOAT, nbOfData INT);
 INSERT INTO Delay (stopID, routeID, delay, nbOfData) VALUES (1125,"2 Copper Creek Drive - EB",0.583333,1);
 INSERT INTO Delay (stopID, routeID, delay, nbOfData) VALUES (3525,"7 Al Pallidini Community Centre - NB",4.483333,1);
 INSERT INTO Delay (stopID, routeID, delay, nbOfData) VALUES (2867,"9101 Finch Terminal - SB",2.100000,1);

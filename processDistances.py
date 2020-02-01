@@ -108,7 +108,7 @@ for f in listdir(join(basePath,'results')):
             delays[stopID][routeID].add(deltaTime.total_seconds()/60)
 
 # Print MySQL code
-print("CREATE TABLE Delay (stopID INT, routeID VARCHAR(30), delay FLOAT, nbOfData INT);");
+print("CREATE TABLE Delay (stopID INT, routeID VARCHAR(50), delay FLOAT, nbOfData INT);");
 for (stopID,routes) in delays.items():
     for (routeID, delayRecords) in routes.items():
         # Calculate average delay
