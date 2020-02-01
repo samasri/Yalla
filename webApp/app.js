@@ -7,7 +7,6 @@ const PORT = 8080; // default port 8080
 const hostname = '0.0.0.0'
 const port = 8080;
 
-app.set("view engine", "ejs");
 
 app.use(express.static('static')); // Tell NodeJS where to find the JS/CSS files
 
@@ -27,7 +26,7 @@ const server = http.createServer((req, res) => {
 });
 
 app.get("/", (req, res) => {
-    res.render("login");
+    res.sendFile(__dirname + "/views/index.html");
 });
 
 app.get("/routes", (req,res) => {
