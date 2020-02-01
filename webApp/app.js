@@ -27,12 +27,7 @@ const server = http.createServer((req, res) => {
 });
 
 app.get("/", (req, res) => {
-  connection.query("SELECT DISTINCT(tripID) FROM Delay", function (error, results, fields) {
-    results = results.slice(0,5);
-    tripIDs = []
-    for(var r of results) tripIDs.push(r.tripID);
-    res.render("login", {"tripIDs": tripIDs});
-  });
+    res.render("login");
 });
 
 app.get("/routes", (req,res) => {
@@ -44,7 +39,7 @@ app.get("/routes", (req,res) => {
 });
 
 app.get("/stops", (req,res) => {
-  query = `SELECT DISTINCT(Delay.stopID),lon,lat
+  query = `SELECT DISTINCT(Delay.stopID),lon,lat,delay
             FROM Delay 
             INNER JOIN Stop 
             ON Delay.stopID=Stop.StopID

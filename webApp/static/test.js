@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    // Create map
     var mymap = L.map('mapid').setView([43.8524, -79.4162], 11);
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -7,6 +8,7 @@ $(document).ready(function() {
         accessToken: token
     }).addTo(mymap);
 
+    // Get all routes and populate them in the select element
     $.ajax({
         type: 'GET',
         url: '/routes',
@@ -29,7 +31,8 @@ $(document).ready(function() {
         }
     });
 
-    var displayedMarkers = L.layerGroup().addTo(mymap);
+    // Fetch stops of the selected route
+    var displayedMarkers = L.featureGroup().addTo(mymap);
     $("#routes").change (function(){
         var routeID = $(this).children("option:selected").val();
         displayedMarkers.clearLayers();
@@ -38,19 +41,20 @@ $(document).ready(function() {
                 type: 'GET',
                 url: '/stops/',
                 data: {"routeID": routeID},
-                success: function(coordinatesString) {
-                    let coordinates = JSON.parse(coordinatesString);
-                    for(coordinate of coordinates) L.marker([coordinate.lat, coordinate.lon]).addTo(displayedMarkers);
+                success: function(resultsString) {
+                    let results = JSON.parse(resultsString);
+                    for(result of results) {
+                        var marker = L.marker([result.lat, result.lon]).addTo(displayedMarkers);
+                        result.delay = (Math.round(result.delay * 100) / 100).toFixed(2)
+                        marker.bindPopup('Average Delay is: ' + result.delay + ' minutes');
+                    }
                 },
                 error: function() {
                     alert("Could not successfully reach server/stops")
                 }
             });
         }
-        return false;
+        
+        return false; // do not refresh page
     });
-
-    $('#searchRoutes').on('blur', function(e){
-        this.value = this.value.trim() || this.defaultValue;
-     });
 });
