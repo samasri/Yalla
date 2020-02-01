@@ -86,7 +86,7 @@ for f in listdir(join(basePath,'results')):
         if tripID not in vehicles: vehicles[tripID] = {}
         if stopSeq in vehicles[tripID]:
             oldRecord = vehicles[tripID][stopSeq]
-            vehicles[tripID][stopSeq] = minRecord(oldRecord,record)
+            vehicles[tripID][stopSeq] = minRecord(oldRecord,record) # keep the data where the vehicle is closest to the stop
         else: vehicles[tripID][stopSeq] = record
 
     total = 0
@@ -103,13 +103,16 @@ for f in listdir(join(basePath,'results')):
             deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(currentDate)
 
             if stopID not in delays: delays[stopID] = {}
-            if routeID not in delays[stopID]: delays[stopID][routeID] = {}
-            delays[stopID][routeID][tripID] = deltaTime.total_seconds()/60 # collect delay data in minutes
-    
-print("CREATE TABLE Delay (stopID INT, routeID INT, tripID INT, delay FLOAT);");
-# print("Stop ID, Route ID, Trip ID, Delay")
+            if routeID not in delays[stopID]: delays[stopID][routeID] = set()
+            delays[stopID][routeID].add(deltaTime.total_seconds()/60)
+
+# Calculate average delay
 for (stopID,routes) in delays.items():
     for (routeID, trips) in routes.items():
-        for tripID,delay in trips.items():
-            print("INSERT INTO Delay (stopID, routeID, tripID, delay) VALUES (%d,%d,%d,%f);" % (int(stopID),int(routeID),int(tripID),float(delay)))
+        delays[stopID][routeID] = sum(trips)/len(trips)
 
+# Print MySQL code
+print("CREATE TABLE Delay (stopID INT, routeID INT, delay FLOAT);");
+for (stopID,routes) in delays.items():
+    for (routeID, delay) in routes.items():
+        print("INSERT INTO Delay (stopID, routeID, delay) VALUES (%d,%d,%f);" % (int(stopID),int(routeID),float(delay)))
