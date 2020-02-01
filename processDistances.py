@@ -106,10 +106,10 @@ for f in listdir(join(basePath,'results')):
             if routeID not in delays[stopID]: delays[stopID][routeID] = {}
             delays[stopID][routeID][tripID] = deltaTime.total_seconds()/60 # collect delay data in minutes
     
-print("CREATE TABLE trips (stopID INT, routeID INT, tripID INT, delay FLOAT);");
+print("CREATE TABLE Delay (stopID INT, routeID INT, tripID INT, delay FLOAT);");
 # print("Stop ID, Route ID, Trip ID, Delay")
 for (stopID,routes) in delays.items():
     for (routeID, trips) in routes.items():
         for tripID,delay in trips.items():
-            print("INSERT INTO trips (stopID, routeID, tripID, delay) VALUES (%d,%d,%d,%f);" % (int(stopID),int(routeID),int(tripID),float(delay)))
+            print("INSERT INTO Delay (stopID, routeID, tripID, delay) VALUES (%d,%d,%d,%f);" % (int(stopID),int(routeID),int(tripID),float(delay)))
 
