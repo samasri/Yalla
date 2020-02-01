@@ -30,9 +30,6 @@ $(document).ready(function() {
 
     var displayedMarkers = L.layerGroup().addTo(mymap);
     $("#routes").change (function(){
-        $('#loading').show();
-        $("#routes").hide();
-        $("#mapid").hide();
         var routeID = $(this).children("option:selected").val();
         displayedMarkers.clearLayers();
         if(routeID != -1 ) {
@@ -41,16 +38,10 @@ $(document).ready(function() {
                 url: '/stops/',
                 data: {"routeID": routeID},
                 success: function(coordinatesString) {
-                    $('#loading').hide();
-                    $("#routes").show();
-                    $("#mapid").show();
                     let coordinates = JSON.parse(coordinatesString);
                     for(coordinate of coordinates) L.marker([coordinate.lat, coordinate.lon]).addTo(displayedMarkers);
                 },
                 error: function() {
-                    $('#loading').hide();
-                    $("#routes").show();
-                    $("#mapid").show();
                     alert("Could not successfully reach server/stops")
                 }
             });
