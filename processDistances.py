@@ -7,6 +7,10 @@ import collections
 import pathlib
 from datetime import timedelta, datetime
 
+if len(sys.argv) < 2:
+    print('Please enter the path to the results file')
+    exit(1)
+else: path = sys.argv[1]
 
 # Parse a CSV file into a list of rows
 def parseCSVtoList(f):
@@ -74,42 +78,41 @@ for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
 
 delays = {}
 tripRoutes = {} # Trip ID --> Route ID
-for f in listdir(join(basePath,'results')):
-    vehicles = {} # Trip ID --> Stop Sequence --> Record
-    for r in open(join(basePath,'results',f)):
-        r = r.strip()
-        if not r: continue
-        r = r.split(',')
-        tripID = r[1]
-        headsign = r[2]
-        routeID = r[3]
-        stopSeq = r[4]
-        record = Record(r[5],r[0]) # A Record constructor takes distance and time
+vehicles = {} # Trip ID --> Stop Sequence --> Record
+for r in open(join(path)):
+    r = r.strip()
+    if not r: continue
+    r = r.split(',')
+    tripID = r[1]
+    headsign = r[2]
+    routeID = r[3]
+    stopSeq = r[4]
+    record = Record(r[5],r[0]) # A Record constructor takes distance and time
 
-        tripRoutes[tripID] = routeID + ' ' + headsign
+    tripRoutes[tripID] = routeID + ' ' + headsign
 
-        if tripID not in vehicles: vehicles[tripID] = {}
-        if stopSeq in vehicles[tripID]:
-            oldRecord = vehicles[tripID][stopSeq]
-            vehicles[tripID][stopSeq] = minRecord(oldRecord,record) # keep the data where the vehicle is closest to the stop
-        else: vehicles[tripID][stopSeq] = record
+    if tripID not in vehicles: vehicles[tripID] = {}
+    if stopSeq in vehicles[tripID]:
+        oldRecord = vehicles[tripID][stopSeq]
+        vehicles[tripID][stopSeq] = minRecord(oldRecord,record) # keep the data where the vehicle is closest to the stop
+    else: vehicles[tripID][stopSeq] = record
 
-    total = 0
-    ignored = 0
-    for tripID, stops in vehicles.items():
-        for stopSeq,record in stops.items():
-            total += 1
-            if record.distance > 20: 
-                ignored += 1
-                continue
-            
-            stopID = tripSchedule[tripID][stopSeq][0]
-            routeID = tripRoutes[tripID]
-            deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(vehicles[tripID][stopSeq].timestamp)
+total = 0
+ignored = 0
+for tripID, stops in vehicles.items():
+    for stopSeq,record in stops.items():
+        total += 1
+        if record.distance > 20: 
+            ignored += 1
+            continue
+        
+        stopID = tripSchedule[tripID][stopSeq][0]
+        routeID = tripRoutes[tripID]
+        deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(vehicles[tripID][stopSeq].timestamp)
 
-            if stopID not in delays: delays[stopID] = {}
-            if routeID not in delays[stopID]: delays[stopID][routeID] = set()
-            delays[stopID][routeID].add(deltaTime.total_seconds()/60)
+        if stopID not in delays: delays[stopID] = {}
+        if routeID not in delays[stopID]: delays[stopID][routeID] = set()
+        delays[stopID][routeID].add(deltaTime.total_seconds()/60)
 
 # Print MySQL code
 print("CREATE TABLE Delay (stopID INT, routeID VARCHAR(50), delay FLOAT, nbOfData INT);");
