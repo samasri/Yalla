@@ -45,7 +45,12 @@ class ArrivalTime:
             difference = self.h - 23
             self.h = 23
         arrivalTime = '%d:%d:%d' % (self.h, self.m, self.s)
-        dateTime = datetime.strptime(date.strip() + '--' + arrivalTime.strip(),"%Y-%m-%d--%H:%M:%S")
+        time = datetime.strptime(arrivalTime.strip(),"%H:%M:%S")
+        dateTime = datetime.combine(date,time.time())
+        # if self.newDay == 1:
+        #     print("Received: " + str(date))
+        #     print("Time: " + str(time))
+        #     print("Combined: " + str(dateTime))
         if self.newDay: dateTime = dateTime + timedelta(hours=difference)
         return dateTime
 
@@ -70,7 +75,6 @@ for r in parseCSVtoList(basePath + "/gtfs/stop_times.txt"):
 delays = {}
 tripRoutes = {} # Trip ID --> Route ID
 for f in listdir(join(basePath,'results')):
-    currentDate = f # file is called after the date it represents
     vehicles = {} # Trip ID --> Stop Sequence --> Record
     for r in open(join(basePath,'results',f)):
         r = r.strip()
@@ -101,7 +105,7 @@ for f in listdir(join(basePath,'results')):
             
             stopID = tripSchedule[tripID][stopSeq][0]
             routeID = tripRoutes[tripID]
-            deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(currentDate)
+            deltaTime = record.timestamp - tripSchedule[tripID][stopSeq][1].toDateTime(vehicles[tripID][stopSeq].timestamp)
 
             if stopID not in delays: delays[stopID] = {}
             if routeID not in delays[stopID]: delays[stopID][routeID] = set()
