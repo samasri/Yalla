@@ -12,18 +12,6 @@ import pathlib
 import time
 from datetime import datetime, timedelta
 
-# Parse arguement
-if len(sys.argv) != 2:
-  print("Please enter number of minutes for this script to run")
-  exit()
-else:
-  try:
-    timeToRun = timedelta(minutes=int(sys.argv[1]))
-  except:
-    print("Arugment is invalid. Please enter an integer representing the number of minutes for this script to run")
-    exit()
-
-
 # Parse a CSV file into a list of rows
 def parseCSVtoList(f):
   result = []
@@ -148,11 +136,6 @@ while True:
     current_time = time.strftime("%D--%H:%M:%S", time.localtime())
     # Printing: Time, Trip ID, Head Sign, Route ID, Stop Sequence, Distance
     print("%s,%s,%s,%s,%s,%f" % (current_time,vehicleTripID,trips[vehicleTripID].headsign, vehicle.trip.route_id,closestSeq,minDistance))
-  runTime = datetime.now() - startTime
-  if runTime >= timeToRun: exit()
-  # Repeat every 30 seconds till for a duration specified in the arguments of this program
   time.sleep(30)
-  runTime = datetime.now() - startTime
-  if runTime >= timeToRun: exit()
 
 
