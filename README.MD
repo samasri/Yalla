@@ -15,8 +15,8 @@ Having lots of bad experiences with buses coming late after moving to Toronto, I
     1. Start the MySQL instance: `service mysql start`
     2. Set up the right user and create the tables: `mysql -u root < sql/start.sql`
     3. `sql/Stop.sql` and `sql/Delay.sql` can also be imported for a demo of how the website will look like after its populated with data:
-      * `mysql -u root yallaDb < sql/Delay.sql`
-      * `mysql -u root yallaDb < sql/Stop.sql`
+        * `mysql -u root yallaDb < sql/Delay.sql`
+        * `mysql -u root yallaDb < sql/Stop.sql`
 5. Change the token in _static/token.js_ to a valid one.
 6. Run the webiste: `cd webApp && npm start`. You can now access the website at `0.0.0.0:49161` from the host machine.
 
