@@ -22,6 +22,14 @@ Having lots of bad experiences with buses coming late after moving to Toronto, I
 
 ## How to Collect Data
 
+In order for the website to give real data, it has to collect live GTFS data from YRT for a while (few days to a month). This data will be later used to calculate the average delay of buses on a specific route and stop. To collect the GTFS data:
+
+1. Make a results directory: `mkdir results`
+2. Run `./getDistances.py >> results/res 2>> results/err`. This script collects data from YRT every 30 seconds and output them to a file.
+3. Once enough data is collected, call `./processData.py results/res > Delay.sql`. This will process the data and output SQL instructions to populate the database.
+4. Finally, run `mysql -u root yallaDb < Delay.sql` to insert the data to the MySQL database.
+    * Make sure to delete any `Delay` table that was in the database from previous data collections. To delete the table, run `mysql -u root yallaDb` to enter the MySQL shell, and then run `DROP TABLE Delay;`.
+
 ## Assumptions
 
 * My understanding is that in GTFS, each trip should be correlated with only one vehicle. However, in some cases, when collecting YRT data, I was finding 2 vehicles for the same trip. In these cases, I just dismiss the vehicles with longer distances since this seems to be a reporting error from YRT.
