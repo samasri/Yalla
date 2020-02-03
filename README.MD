@@ -2,6 +2,10 @@
 
 Having lots of bad experiences with buses coming late after moving to Toronto, I create this project to calculate the average delay of YRT buses so that I can go at the right time to catch the bus. Using the real time GTFS data about their vehicle and stop positions, I calculate when does a bus passes each stop every day and compare it with the scheduled time. I intend to do this and over time, I would have enough data to get reliable delay averages.
 
+## Dependency
+
+* An account on leafletjs.com (the map API)
+
 ## Getting Started
 
 1. Build the docker image from the Dockerfile: `docker build -t samasri/yalla .`
@@ -13,7 +17,8 @@ Having lots of bad experiences with buses coming late after moving to Toronto, I
     3. `sql/Stop.sql` and `sql/Delay.sql` can also be imported for a demo of how the website will look like after its populated with data:
       * `mysql -u root yallaDb < sql/Delay.sql`
       * `mysql -u root yallaDb < sql/Stop.sql`
-5. Run the webiste: `cd webApp && npm start`. You can now access the website at `0.0.0.0:49161` from the host machine.
+5. Change the token in _static/token.js_ to a valid one.
+6. Run the webiste: `cd webApp && npm start`. You can now access the website at `0.0.0.0:49161` from the host machine.
 
 ## How to Collect Data
 
