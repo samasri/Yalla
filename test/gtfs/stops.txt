@@ -1,0 +1,6 @@
+stop_id,stop_code,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url,location_type,parent_station,stop_timezone,wheelchair_boarding
+101,,,,43.8524,-79.4162,,,,,,
+102,,,,43.9024,-79.4662,,,,,,
+103,,,,43.9524,-79.5162,,,,,,
+104,,,,44.0024,-79.5662,,,,,,
+105,,,,44.0524,-79.6162,,,,,,
