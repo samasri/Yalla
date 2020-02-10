@@ -1,0 +1,8 @@
+02/07/20--06:33:13,1401566,Finch Terminal - MO,302,40,10.000000 
+02/07/20--06:34:13,1401566,Finch Terminal - MO,302,40,5.000000
+02/07/20--06:34:13,1401566,Finch Terminal - MO,302,40,15.000000 # Test 1: triple records
+02/07/21--06:34:13,1401566,Finch Terminal - MO,302,40,0.000000 # Test 2: Same stop and trip, different day
+02/07/20--07:53:13,1401565,Finch Terminal - MO,302,41,0.000000 # Test 3: Arriving early
+02/07/23--07:35:13,1401567,Finch Terminal - MO,302,40,3000.000000 # Test 4: Too far
+
+# INSERT INTO Delay (stopID, routeID, delay, nbOfData) VALUES (3157,"302 Finch Terminal - MO",0.216667,2);

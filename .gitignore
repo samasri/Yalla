@@ -1,3 +1,4 @@
 webApp/node_modules/
 results/
 webApp/package-lock.json
+*__pycache__*

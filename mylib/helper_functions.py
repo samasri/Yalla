@@ -29,3 +29,8 @@ def calculateDistance(lat1,lon1, lat2,lon2):
 
   distance = R * c * 1000 # in meters
   return distance
+
+
+def minRecord(obj1, obj2):
+    if obj1.distance < obj2.distance: return obj1
+    else: return obj2
