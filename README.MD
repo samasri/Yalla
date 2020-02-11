@@ -28,6 +28,18 @@ In order for the website to give real data, it has to collect live GTFS data fro
 2. Once enough data is collected, call `./mylib/processData.py results > Delay.sql`. This will process the data and output SQL instructions to populate the database.
 3. Finally, run `mysql -u root yallaDb < Delay.sql` to insert the data to the MySQL database.
     * Make sure to delete any `Delay` table that was in the database from previous data collections. To delete the table, run `mysql -u root yallaDb` to enter the MySQL shell, and then run `DROP TABLE Delay;`.
+    
+## Testing
+
+run ./test/test.py
+    
+## Screenshots
+
+![image](https://user-images.githubusercontent.com/12204690/74210748-fa665700-4c5a-11ea-9261-b8316dcd3657.png)
+
+![image](https://user-images.githubusercontent.com/12204690/74210808-3dc0c580-4c5b-11ea-9cf4-10158db9bf82.png)
+
+![image](https://user-images.githubusercontent.com/12204690/74210832-54ffb300-4c5b-11ea-8f88-72b8aa56c11d.png)
 
 ## Assumptions
 
