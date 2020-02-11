@@ -31,7 +31,7 @@ In order for the website to give real data, it has to collect live GTFS data fro
     
 ## Testing
 
-run ./test/test.py
+Run `./test/test.py` to test the python scripts.
     
 ## Screenshots
 
