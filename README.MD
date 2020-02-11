@@ -1,6 +1,6 @@
 # Yalla
 
-Having lots of bad experiences with buses coming late after moving to Toronto, I create this project to calculate the average delay of YRT buses so that I can go at the right time to catch the bus. Using the real time GTFS data about their vehicle and stop positions, I calculate when does a bus passes each stop every day and compare it with the scheduled time. I intend to do this and over time, I would have enough data to get reliable delay averages.
+Having lots of bad experiences with buses coming late after moving to Toronto, I create this project to calculate the average delay of YRT buses so that I can go at the right time to catch the bus. Using the real time GTFS data about their vehicle and stop positions, I calculate when does a bus actually arrive at each stop every day and compare it with the scheduled time. I run the program over time, I get plenty of data which makes the delay averages more reliable.
 
 ## Dependency
 
